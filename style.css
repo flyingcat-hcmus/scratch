@@ -189,24 +189,32 @@ button.active, button:hover {
 }
 
 /* --- POPUP CHÚC MỪNG --- */
-#congrats-popup {
+#congrats-popup, #sad-popup {
     position: fixed;
     top: 50%;
     left: 50%;
     transform: translate(-50%, -50%) scale(1);
-    background: linear-gradient(135deg, #f1c40f, #e67e22);
     color: #fff;
     padding: 20px 40px;
     border-radius: 12px;
     font-size: 24px;
     font-weight: bold;
-    box-shadow: 0 10px 30px rgba(243, 156, 18, 0.5);
     z-index: 1000;
     pointer-events: none;
     animation: popIn 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards;
 }
 
-#congrats-popup.hidden {
+#congrats-popup {
+    background: linear-gradient(135deg, #f1c40f, #e67e22);
+    box-shadow: 0 10px 30px rgba(243, 156, 18, 0.5);
+}
+
+#sad-popup {
+    background: linear-gradient(135deg, #7f8c8d, #34495e);
+    box-shadow: 0 10px 30px rgba(127, 140, 141, 0.5);
+}
+
+#congrats-popup.hidden, #sad-popup.hidden {
     display: none;
 }
 

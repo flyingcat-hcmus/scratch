@@ -81,10 +81,10 @@ public class CardService
 
     public Card DrawRandomCard()
     {
-        // Tự động Reset kho thẻ nếu đã rút hết (Giải pháp 3)
+        // Khi hết thẻ thì báo hết, KHÔNG tự động reset nữa
         if (_pool.Count == 0) 
         {
-            ResetPool();
+            return null;
         }
 
         int index = _random.Next(_pool.Count);

@@ -1,18 +1,20 @@
 let currentMode = 'scratch-mode';
-const API_BASE_URL = ''; // Để trống để tự động lấy host hiện tại
+const API_BASE_URL = 'https://e9ceab94e8575a.lhr.life';
 
 async function drawCardFromAPI() {
     try {
         const response = await fetch(`${API_BASE_URL}/api/cards/draw`);
         if (response.status === 404) {
-            alert('Đã hết thẻ trong kho! Hãy Reset lại kho thẻ.');
+            alert('Đã hết thẻ trong kho! Hãy quay lại sau.');
             return null;
         }
         return await response.json();
     } catch (error) {
         console.error('Lỗi khi gọi API:', error);
-        alert('Không thể kết nối tới Backend. Hãy chắc chắn backend đang chạy ở localhost:5286!');
+        alert('Không thể kết nối tới Backend. Hãy kiểm tra kết nối!');
         return null;
+    }
+}
 
 async function initScratchMode() {
     const cardObj = await drawCardFromAPI();
@@ -104,15 +106,13 @@ function setupScratchLogic(canvas, ctx, wrapper, isRare) {
                 canvas.remove();
                 if (isRare) {
                     wrapper.classList.add('rare-revealed');
-                    
-                    // Hiện Popup chúc mừng
                     const popup = document.getElementById('congrats-popup');
                     popup.classList.remove('hidden');
-                    
-                    // Tự ẩn popup sau 3.5 giây
-                    setTimeout(() => {
-                        popup.classList.add('hidden');
-                    }, 3500);
+                    setTimeout(() => popup.classList.add('hidden'), 3500);
+                } else {
+                    const popup = document.getElementById('sad-popup');
+                    popup.classList.remove('hidden');
+                    setTimeout(() => popup.classList.add('hidden'), 3500);
                 }
             }, 500);
         }
@@ -248,14 +248,13 @@ async function initValorantMode() {
             this.classList.add('flipped');
             if (cardObj.isRare) {
                 this.classList.add('rare');
-                // Hiện Popup chúc mừng
                 const popup = document.getElementById('congrats-popup');
                 popup.classList.remove('hidden');
-                
-                // Tự ẩn popup sau 3.5 giây
-                setTimeout(() => {
-                    popup.classList.add('hidden');
-                }, 3500);
+                setTimeout(() => popup.classList.add('hidden'), 3500);
+            } else {
+                const popup = document.getElementById('sad-popup');
+                popup.classList.remove('hidden');
+                setTimeout(() => popup.classList.add('hidden'), 3500);
             }
         }
     });
@@ -281,4 +280,3 @@ document.getElementById('draw-btn').addEventListener('click', () => {
     }
 });
 
-// Bỏ tự động gọi lúc load trang để user tự bấm nút rút thẻ
