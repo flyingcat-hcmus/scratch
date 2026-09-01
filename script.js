@@ -1,59 +1,48 @@
-// Cấu hình kho hình ảnh mèo
-const catImages = [
-    'https://cattime.com/wp-content/uploads/sites/14/2011/12/GettyImages-1319206416-e1697653931697.jpg?w=1024',
-    'https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcQBCGT7VYA9RhOgINThMhjoFacQ2J86ILcJcDKQL0ugnmTSRbvcPQdnD5w&s=10',
-    'https://placecats.com/200/300?3',
-    'https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcRIBGDzp8I00qolfUfHL5qBXSVhSJz4emasu7jOLqlQAWv2_3pgSSsZ00w1&s=10'
-];
-
 let currentMode = 'scratch-mode';
+const API_BASE_URL = ''; // Để trống để tự động lấy host hiện tại
 
-// Thuật toán sinh mảng 4 thẻ (1 Hiếm, 3 Thường)
-function generateDeck() {
-    let deck = [
-        { isRare: true, img: catImages[0] },
-        { isRare: false, img: catImages[1] },
-        { isRare: false, img: catImages[2] },
-        { isRare: false, img: catImages[3] }
-    ];
-    // Xáo trộn Fisher-Yates
-    for (let i = deck.length - 1; i > 0; i--) {
-        const j = Math.floor(Math.random() * (i + 1));
-        [deck[i], deck[j]] = [deck[j], deck[i]];
-    }
-    return deck;
-}
+async function drawCardFromAPI() {
+    try {
+        const response = await fetch(`${API_BASE_URL}/api/cards/draw`);
+        if (response.status === 404) {
+            alert('Đã hết thẻ trong kho! Hãy Reset lại kho thẻ.');
+            return null;
+        }
+        return await response.json();
+    } catch (error) {
+        console.error('Lỗi khi gọi API:', error);
+        alert('Không thể kết nối tới Backend. Hãy chắc chắn backend đang chạy ở localhost:5286!');
+        return null;
 
-// KHỞI TẠO CHẾ ĐỘ CÀO THẺ
-function initScratchMode() {
+async function initScratchMode() {
+    const cardObj = await drawCardFromAPI();
+    if (!cardObj) return;
+
     const grid = document.getElementById('scratch-grid');
-    grid.innerHTML = '';
-    const deck = generateDeck();
+    grid.innerHTML = ''; // Chỉ hiển thị 1 thẻ mỗi lần rút
 
-    deck.forEach((cardObj) => {
-        const wrapper = document.createElement('div');
-        wrapper.className = 'scratch-card-wrapper';
+    const wrapper = document.createElement('div');
+    wrapper.className = 'scratch-card-wrapper';
 
-        const img = document.createElement('img');
-        img.src = cardObj.img;
-        img.className = 'card-image';
+    const img = document.createElement('img');
+    img.src = cardObj.img;
+    img.className = 'card-image';
 
-        const canvas = document.createElement('canvas');
-        canvas.className = 'scratch-canvas';
-        canvas.width = 200;
-        canvas.height = 300;
-        const ctx = canvas.getContext('2d', { willReadFrequently: true });
+    const canvas = document.createElement('canvas');
+    canvas.className = 'scratch-canvas';
+    canvas.width = 200;
+    canvas.height = 300;
+    const ctx = canvas.getContext('2d', { willReadFrequently: true });
 
-        // Phủ lớp xám lên canvas
-        ctx.fillStyle = '#95a5a6';
-        ctx.fillRect(0, 0, canvas.width, canvas.height);
+    // Phủ lớp xám lên canvas
+    ctx.fillStyle = '#95a5a6';
+    ctx.fillRect(0, 0, canvas.width, canvas.height);
 
-        wrapper.appendChild(img);
-        wrapper.appendChild(canvas);
-        grid.appendChild(wrapper);
+    wrapper.appendChild(img);
+    wrapper.appendChild(canvas);
+    grid.appendChild(wrapper);
 
-        setupScratchLogic(canvas, ctx, wrapper, cardObj.isRare);
-    });
+    setupScratchLogic(canvas, ctx, wrapper, cardObj.isRare);
 }
 
 // LOGIC XÓA LỚP PHỦ 
@@ -115,6 +104,15 @@ function setupScratchLogic(canvas, ctx, wrapper, isRare) {
                 canvas.remove();
                 if (isRare) {
                     wrapper.classList.add('rare-revealed');
+                    
+                    // Hiện Popup chúc mừng
+                    const popup = document.getElementById('congrats-popup');
+                    popup.classList.remove('hidden');
+                    
+                    // Tự ẩn popup sau 3.5 giây
+                    setTimeout(() => {
+                        popup.classList.add('hidden');
+                    }, 3500);
                 }
             }, 500);
         }
@@ -215,43 +213,51 @@ function setupScratchLogic(canvas, ctx, wrapper, isRare) {
 }
 
 // KHỞI TẠO CHẾ ĐỘ VALORANT NIGHT MARKET
-function initValorantMode() {
+async function initValorantMode() {
+    const cardObj = await drawCardFromAPI();
+    if (!cardObj) return;
+
     const grid = document.getElementById('valorant-grid');
     grid.innerHTML = '';
-    const deck = generateDeck();
 
-    deck.forEach((cardObj) => {
-        const valCard = document.createElement('div');
-        valCard.className = 'val-card';
-        
-        const inner = document.createElement('div');
-        inner.className = 'val-card-inner';
+    const valCard = document.createElement('div');
+    valCard.className = 'val-card';
+    
+    const inner = document.createElement('div');
+    inner.className = 'val-card-inner';
 
-        const front = document.createElement('div');
-        front.className = 'val-front';
+    const front = document.createElement('div');
+    front.className = 'val-front';
 
-        const back = document.createElement('div');
-        back.className = 'val-back';
-        
-        const img = document.createElement('img');
-        img.src = cardObj.img;
-        img.className = 'card-image';
-        
-        back.appendChild(img);
-        inner.appendChild(front);
-        inner.appendChild(back);
-        valCard.appendChild(inner);
-        grid.appendChild(valCard);
+    const back = document.createElement('div');
+    back.className = 'val-back';
+    
+    const img = document.createElement('img');
+    img.src = cardObj.img;
+    img.className = 'card-image';
+    
+    back.appendChild(img);
+    inner.appendChild(front);
+    inner.appendChild(back);
+    valCard.appendChild(inner);
+    grid.appendChild(valCard);
 
-        // Logic lật thẻ
-        valCard.addEventListener('click', function() {
-            if (!this.classList.contains('flipped')) {
-                this.classList.add('flipped');
-                if (cardObj.isRare) {
-                    this.classList.add('rare');
-                }
+    // Logic lật thẻ
+    valCard.addEventListener('click', function() {
+        if (!this.classList.contains('flipped')) {
+            this.classList.add('flipped');
+            if (cardObj.isRare) {
+                this.classList.add('rare');
+                // Hiện Popup chúc mừng
+                const popup = document.getElementById('congrats-popup');
+                popup.classList.remove('hidden');
+                
+                // Tự ẩn popup sau 3.5 giây
+                setTimeout(() => {
+                    popup.classList.add('hidden');
+                }, 3500);
             }
-        });
+        }
     });
 }
 
@@ -267,11 +273,12 @@ document.querySelectorAll('.tab-btn').forEach(btn => {
     });
 });
 
-document.getElementById('reset-btn').addEventListener('click', () => {
-    initScratchMode();
-    initValorantMode();
+document.getElementById('draw-btn').addEventListener('click', () => {
+    if (currentMode === 'scratch-mode') {
+        initScratchMode();
+    } else {
+        initValorantMode();
+    }
 });
 
-// Khởi chạy lần đầu
-initScratchMode();
-initValorantMode();
+// Bỏ tự động gọi lúc load trang để user tự bấm nút rút thẻ
