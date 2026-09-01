@@ -1,0 +1,220 @@
+* {
+    box-sizing: border-box;
+    margin: 0;
+    padding: 0;
+    -webkit-tap-highlight-color: transparent;
+}
+
+body {
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    background-color: #1a1a2e;
+    color: #fff;
+    display: flex;
+    justify-content: center;
+    padding: 40px 20px;
+    -webkit-user-select: none;
+    user-select: none;
+}
+
+.container {
+    max-width: 1000px;
+    width: 100%;
+    text-align: center;
+}
+
+/* Tabs & Buttons */
+.tabs {
+    margin: 20px 0;
+    display: flex;
+    justify-content: center;
+    gap: 10px;
+}
+
+button {
+    padding: 10px 20px;
+    border: none;
+    border-radius: 8px;
+    cursor: pointer;
+    font-weight: bold;
+    background-color: #2c2c54;
+    color: white;
+    transition: 0.3s;
+    touch-action: manipulation;
+}
+
+button.active, button:hover {
+    background-color: #e94560;
+}
+
+.controls {
+    margin-bottom: 30px;
+}
+
+#reset-btn {
+    background-color: #4cd137;
+    font-size: 16px;
+}
+
+.tab-content {
+    display: none;
+}
+
+.tab-content.active {
+    display: block;
+}
+
+/* Card Grid */
+.card-grid {
+    display: flex;
+    justify-content: center;
+    gap: 20px;
+    flex-wrap: wrap;
+}
+
+/* --- CHẾ ĐỘ CÀO THẺ --- */
+.scratch-card-wrapper {
+    position: relative;
+    width: 200px;
+    height: 300px;
+    border-radius: 12px;
+    overflow: hidden;
+    background: #fff;
+    box-shadow: 0 4px 15px rgba(0,0,0,0.3);
+    touch-action: none;
+    -webkit-touch-callout: none;
+    -webkit-user-select: none;
+    user-select: none;
+}
+
+.card-image {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    display: block;
+    pointer-events: none;
+    -webkit-user-drag: none;
+    -webkit-touch-callout: none;
+}
+
+.scratch-canvas {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    cursor: default;
+    z-index: 2;
+    touch-action: none;
+    -webkit-touch-callout: none;
+    -webkit-user-select: none;
+    user-select: none;
+}
+
+/* Hiệu ứng Thẻ Hiếm */
+.rare-revealed {
+    animation: rareGlow 1.5s infinite alternate, popUp 0.5s forwards;
+    border: 4px solid #a29bfe;
+    z-index: 10;
+}
+
+@keyframes rareGlow {
+    from { box-shadow: 0 0 10px #a29bfe, 0 0 20px #a29bfe; }
+    to { box-shadow: 0 0 20px #6c5ce7, 0 0 40px #6c5ce7; }
+}
+
+@keyframes popUp {
+    0% { transform: scale(1); }
+    50% { transform: scale(1.1); }
+    100% { transform: scale(1.05); }
+}
+
+/* --- CHẾ ĐỘ VALORANT NIGHT MARKET --- */
+.val-card {
+    width: 200px;
+    height: 300px;
+    perspective: 1000px; /* Tạo độ sâu 3D */
+    cursor: pointer;
+    touch-action: manipulation;
+    -webkit-touch-callout: none;
+    -webkit-user-select: none;
+    user-select: none;
+}
+
+.val-card-inner {
+    width: 100%;
+    height: 100%;
+    position: relative;
+    transition: transform 0.6s cubic-bezier(0.4, 0.2, 0.2, 1);
+    transform-style: preserve-3d;
+}
+
+/* Lật thẻ */
+.val-card.flipped .val-card-inner {
+    transform: rotateY(180deg);
+}
+
+.val-front, .val-back {
+    width: 100%;
+    height: 100%;
+    position: absolute;
+    backface-visibility: hidden;
+    border-radius: 12px;
+    overflow: hidden;
+}
+
+.val-front {
+    background: linear-gradient(135deg, #2d3436, #000000);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border: 2px solid #636e72;
+    box-shadow: 0 0 10px rgba(0,0,0,0.5);
+}
+
+.val-front::after {
+    content: "?";
+    font-size: 40px;
+    color: #b2bec3;
+    font-weight: bold;
+}
+
+.val-back {
+    transform: rotateY(180deg);
+    background: #fff;
+}
+
+.val-card.flipped.rare .val-back {
+    animation: rareGlow 1.5s infinite alternate;
+    border: 4px solid #a29bfe;
+}
+
+/* --- RESPONSIVE CHO ĐIỆN THOẠI --- */
+@media (max-width: 600px) {
+    body {
+        padding: 20px 12px;
+    }
+
+    h1 {
+        font-size: 1.4rem;
+    }
+
+    .tabs {
+        flex-wrap: wrap;
+        gap: 8px;
+    }
+
+    button {
+        padding: 10px 16px;
+        font-size: 14px;
+    }
+
+    .card-grid {
+        gap: 12px;
+    }
+
+    .scratch-card-wrapper, .val-card {
+        width: calc(50% - 8px);
+        max-width: 165px;
+        height: 240px;
+    }
+}

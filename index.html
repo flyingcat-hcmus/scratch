@@ -1,0 +1,36 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Cào thẻ</title>
+    <link rel="stylesheet" href="style.css">
+    <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>🐱</text></svg>">
+</head>
+<body>
+    <div class="container">
+        <h1>Gacha Thẻ Mèo Đặc Biệt</h1>
+        
+        <div class="tabs">
+            <button class="tab-btn active" data-target="scratch-mode">Chế độ Cào Thẻ</button>
+            <button class="tab-btn" data-target="valorant-mode">Chế độ 2</button>
+        </div>
+
+        <div class="controls">
+            <button id="reset-btn">Tạo 4 thẻ mới</button>
+        </div>
+
+        <!-- Chế độ Cào thẻ -->
+        <div id="scratch-mode" class="tab-content active">
+            <div class="card-grid" id="scratch-grid"></div>
+        </div>
+
+        <!-- Chế độ Valorant Night Market -->
+        <div id="valorant-mode" class="tab-content">
+            <div class="card-grid" id="valorant-grid"></div>
+        </div>
+    </div>
+
+    <script src="script.js"></script>
+</body>
+</html>
