@@ -21,17 +21,7 @@ var app = builder.Build();
 
 app.UseCors("AllowAll");
 
-// Cho phép phục vụ file tĩnh (HTML, CSS, JS) từ thư mục gốc của project
-var parentFolder = Path.GetFullPath(Path.Combine(builder.Environment.ContentRootPath, ".."));
-app.UseDefaultFiles(new DefaultFilesOptions
-{
-    FileProvider = new PhysicalFileProvider(parentFolder)
-});
-app.UseStaticFiles(new StaticFileOptions
-{
-    FileProvider = new PhysicalFileProvider(parentFolder),
-    RequestPath = ""
-});
+app.MapGet("/", () => "Card Backend API is running!");
 
 app.MapGet("/api/cards/draw", (CardService cardService) =>
 {
