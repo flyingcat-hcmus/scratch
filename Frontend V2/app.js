@@ -1,4 +1,4 @@
-const API_BASE_URL = 'hhttps://scratch-e7e5.onrender.com/api/cards';
+const API_BASE_URL = 'https://scratch-e7e5.onrender.com/api/cards';
 
 // Application State
 let cardsData = [];
