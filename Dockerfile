@@ -27,10 +27,11 @@ WORKDIR /app
 
 COPY --from=build /app/publish .
 
-# Render Web Service Configuration (Port 8080)
+# Render Web Service Configuration
 ENV ASPNETCORE_HTTP_PORTS=8080
 ENV ASPNETCORE_URLS=http://+:8080
 ENV ASPNETCORE_ENVIRONMENT=Production
+ENV DOTNET_USE_POLLING_FILE_WATCHER=true
 EXPOSE 8080
 
 ENTRYPOINT ["dotnet", "API.dll"]
