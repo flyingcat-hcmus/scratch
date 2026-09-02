@@ -45,30 +45,57 @@ public class CardService(CardDbContext db, ILogger<CardService> logger) : ICardS
     {
         try
         {
-            var now = DateTime.UtcNow;
-            var drawnCard = await db.Cards
-                .FromSqlInterpolated($@"
-                    WITH selected_card AS (
-                        SELECT ""Id""
-                        FROM ""Cards""
-                        WHERE ""Remaining"" > 0
-                        ORDER BY RANDOM()
-                        LIMIT 1
-                        FOR UPDATE SKIP LOCKED
-                    )
-                    UPDATE ""Cards""
-                    SET 
-                        ""Remaining"" = ""Remaining"" - 1,
-                        ""DrawnAt"" = {now},
-                        ""DeviceInfo"" = {deviceInfo}
-                    FROM selected_card
-                    WHERE ""Cards"".""Id"" = selected_card.""Id""
-                    RETURNING ""Cards"".*;
-                ")
-                .AsNoTracking()
-                .FirstOrDefaultAsync();
+            var conn = db.Database.GetDbConnection();
+            if (conn.State != System.Data.ConnectionState.Open)
+            {
+                await conn.OpenAsync();
+            }
 
-            return drawnCard;
+            using var cmd = conn.CreateCommand();
+            cmd.CommandText = @"
+                WITH selected_card AS (
+                    SELECT ""Id""
+                    FROM ""Cards""
+                    WHERE ""Remaining"" > 0
+                    ORDER BY RANDOM()
+                    LIMIT 1
+                    FOR UPDATE SKIP LOCKED
+                )
+                UPDATE ""Cards""
+                SET 
+                    ""Remaining"" = ""Remaining"" - 1,
+                    ""DrawnAt"" = @drawnAt,
+                    ""DeviceInfo"" = @deviceInfo
+                FROM selected_card
+                WHERE ""Cards"".""Id"" = selected_card.""Id""
+                RETURNING ""Cards"".""Id"", ""Cards"".""ImgUrl"", ""Cards"".""IsRare"", ""Cards"".""Quantity"", ""Cards"".""Remaining"", ""Cards"".""DrawnAt"", ""Cards"".""DeviceInfo"";
+            ";
+
+            var pDrawnAt = cmd.CreateParameter();
+            pDrawnAt.ParameterName = "@drawnAt";
+            pDrawnAt.Value = DateTime.UtcNow;
+            cmd.Parameters.Add(pDrawnAt);
+
+            var pDeviceInfo = cmd.CreateParameter();
+            pDeviceInfo.ParameterName = "@deviceInfo";
+            pDeviceInfo.Value = (object?)deviceInfo ?? DBNull.Value;
+            cmd.Parameters.Add(pDeviceInfo);
+
+            using var reader = await cmd.ExecuteReaderAsync();
+            if (await reader.ReadAsync())
+            {
+                var id = reader.GetGuid(0);
+                var imgUrl = reader.GetString(1);
+                var isRare = reader.GetBoolean(2);
+                var quantity = reader.GetInt32(3);
+                var remaining = reader.GetInt32(4);
+                var drawnAt = reader.IsDBNull(5) ? (DateTime?)null : reader.GetDateTime(5);
+                var devInfo = reader.IsDBNull(6) ? null : reader.GetString(6);
+
+                return Card.CreateExisting(id, imgUrl, isRare, quantity, remaining, drawnAt, devInfo);
+            }
+
+            return null;
         }
         catch (Exception e)
         {

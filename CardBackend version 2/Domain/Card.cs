@@ -24,6 +24,20 @@ public class Card
         };
     }
 
+    public static Card CreateExisting(Guid id, string url, bool rare, int quantity, int remaining, DateTime? drawnAt, string? deviceInfo)
+    {
+        return new Card
+        {
+            Id = id,
+            ImgUrl = url,
+            IsRare = rare,
+            Quantity = quantity,
+            Remaining = remaining,
+            DrawnAt = drawnAt,
+            DeviceInfo = deviceInfo
+        };
+    }
+
     public void UpdateCard(string? url, bool? rare, int? quantity)
     {
         if (!string.IsNullOrEmpty(url))

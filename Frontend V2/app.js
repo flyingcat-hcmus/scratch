@@ -402,6 +402,10 @@ function renderGridView(cards) {
           </div>
 
           <!-- Actions -->
+          <div class="d-flex gap-2 pt-2 border-top border-white-50 border-opacity-10 mt-2">
+            <button class="btn btn-outline-primary btn-sm rounded-pill flex-grow-1 py-1" onclick="openEditCardModal('${card.id}')">
+              <i class="bi bi-pencil-square me-1"></i> Sửa
+            </button>
             <button class="btn btn-outline-danger btn-sm rounded-pill px-3 py-1" onclick="confirmDeleteCard('${card.id}')">
               <i class="bi bi-trash"></i>
             </button>
