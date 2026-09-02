@@ -1,6 +1,5 @@
 let currentMode = 'scratch-mode';
-// const API_BASE_URL = 'https://scratch-e7e5.onrender.com';
-const API_BASE_URL = 'http://localhost:5037/api/cards';
+const API_BASE_URL = 'https://scratch-e7e5.onrender.com';
 
 async function drawCardFromAPI() {
     try {
