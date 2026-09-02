@@ -1,7 +1,7 @@
 # ==============================================================================
-# 1. Build Stage
+# 1. Build Stage (.NET 9.0 Official Stable SDK)
 # ==============================================================================
-FROM mcr.microsoft.com/dotnet/sdk:10.0-preview AS build
+FROM mcr.microsoft.com/dotnet/sdk:9.0 AS build
 WORKDIR /src
 
 # Copy project files
@@ -20,9 +20,9 @@ WORKDIR "/src/CardBackend version 2/API"
 RUN dotnet publish "API.csproj" -c Release -o /app/publish /p:UseAppHost=false
 
 # ==============================================================================
-# 2. Runtime Stage
+# 2. Runtime Stage (.NET 9.0 Official Stable ASP.NET Runtime)
 # ==============================================================================
-FROM mcr.microsoft.com/dotnet/aspnet:10.0-preview AS final
+FROM mcr.microsoft.com/dotnet/aspnet:9.0 AS final
 WORKDIR /app
 
 COPY --from=build /app/publish .
