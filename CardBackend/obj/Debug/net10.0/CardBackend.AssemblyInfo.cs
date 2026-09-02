@@ -13,7 +13,7 @@ using System.Reflection;
 [assembly: System.Reflection.AssemblyCompanyAttribute("CardBackend")]
 [assembly: System.Reflection.AssemblyConfigurationAttribute("Debug")]
 [assembly: System.Reflection.AssemblyFileVersionAttribute("1.0.0.0")]
-[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0+c0a73f4379d0b8d7c3106614d8e9279d8698d712")]
+[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0+4e6d49df4ebb9bd6d842db23966844dae790ab94")]
 [assembly: System.Reflection.AssemblyProductAttribute("CardBackend")]
 [assembly: System.Reflection.AssemblyTitleAttribute("CardBackend")]
 [assembly: System.Reflection.AssemblyVersionAttribute("1.0.0.0")]

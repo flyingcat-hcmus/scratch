@@ -1,5 +1,5 @@
 let currentMode = 'scratch-mode';
-const API_BASE_URL = 'https://9d20bf35a5a33a.lhr.life';
+const API_BASE_URL = 'https://ab8307a46d10ca.lhr.life';
 
 async function drawCardFromAPI() {
     try {
