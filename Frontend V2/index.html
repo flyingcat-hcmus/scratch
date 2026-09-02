@@ -1,0 +1,350 @@
+<!DOCTYPE html>
+<html lang="vi" data-bs-theme="dark">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Card Arena - Admin Master Console</title>
+  
+  <!-- CSS Frameworks & Icons -->
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/sweetalert2@11.10.5/dist/sweetalert2.min.css">
+  
+  <!-- Custom Modern Styles -->
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+  <!-- Top Glass Navigation -->
+  <header class="glass-nav sticky-top py-3 mb-4">
+    <div class="container-fluid px-lg-5 d-flex justify-content-between align-items-center">
+      <div class="d-flex align-items-center gap-3">
+        <div class="rounded-3 p-2 d-flex align-items-center justify-content-center" style="background: linear-gradient(135deg, #a855f7, #6366f1); width: 44px; height: 44px;">
+          <i class="bi bi-layers-fill text-white fs-4"></i>
+        </div>
+        <div>
+          <h1 class="h5 mb-0 fw-bold tracking-wide d-flex align-items-center gap-2">
+            CARD ARENA <span class="badge bg-purple-subtle text-white border border-purple-subtle fw-semibold" style="font-size: 0.65rem; background: rgba(168, 85, 247, 0.2); border-color: #a855f7 !important;">ADMIN CONSOLE</span>
+          </h1>
+          <div class="d-flex align-items-center gap-2 mt-1">
+            <span id="server-status-dot" class="pulse-dot online"></span>
+            <small id="server-status-text" class="text-secondary" style="font-size: 0.75rem;">Backend: Đang kết nối...</small>
+          </div>
+        </div>
+      </div>
+
+      <!-- Header Action Buttons -->
+      <div class="d-flex align-items-center gap-2">
+        <button id="refresh-btn" class="btn btn-outline-secondary btn-sm rounded-pill px-3" title="Tải lại dữ liệu">
+          <i class="bi bi-arrow-clockwise me-1"></i> Làm mới
+        </button>
+
+        <!-- Nút Thử Rút Thẻ Simulator -->
+        <button id="open-simulator-btn" class="btn btn-outline-info btn-sm rounded-pill px-3 shadow-sm" data-bs-toggle="modal" data-bs-target="#simulatorModal">
+          <i class="bi bi-dice-5-fill me-1"></i> Rút thử
+        </button>
+
+        <!-- Nút Thêm Thẻ Mới -->
+        <button class="btn btn-primary btn-sm rounded-pill px-3 shadow-sm d-flex align-items-center gap-1" style="background: linear-gradient(135deg, #a855f7, #6366f1); border: none;" data-bs-toggle="modal" data-bs-target="#cardModal" onclick="openAddCardModal()">
+          <i class="bi bi-plus-circle-fill"></i> Thêm thẻ mới
+        </button>
+      </div>
+    </div>
+  </header>
+
+  <!-- Main Container -->
+  <main class="container-fluid px-lg-5 pb-5">
+
+    <!-- 1. Stats KPI Row -->
+    <section class="row g-4 mb-4">
+      <div class="col-6 col-xl-3">
+        <div class="glass-panel stat-card stat-primary p-4 h-100">
+          <div class="d-flex justify-content-between align-items-start">
+            <div>
+              <p class="text-secondary small fw-semibold text-uppercase mb-1">Tổng số mẫu thẻ</p>
+              <h2 id="stat-total-cards" class="display-6 fw-bold mb-0 text-white">0</h2>
+            </div>
+            <div class="icon-box">
+              <i class="bi bi-collection-fill"></i>
+            </div>
+          </div>
+          <div class="mt-3 pt-2 border-top border-white-50 border-opacity-10 d-flex justify-content-between small text-secondary">
+            <span>Tổng lượng thẻ phát hành:</span>
+            <span id="stat-total-quantity" class="fw-bold text-light">0</span>
+          </div>
+        </div>
+      </div>
+
+      <div class="col-6 col-xl-3">
+        <div class="glass-panel stat-card stat-success p-4 h-100">
+          <div class="d-flex justify-content-between align-items-start">
+            <div>
+              <p class="text-secondary small fw-semibold text-uppercase mb-1">Thẻ còn trong kho</p>
+              <h2 id="stat-available" class="display-6 fw-bold mb-0 text-white">0</h2>
+            </div>
+            <div class="icon-box">
+              <i class="bi bi-box-seam-fill"></i>
+            </div>
+          </div>
+          <div class="mt-3 pt-2 border-top border-white-50 border-opacity-10">
+            <div class="d-flex justify-content-between small text-secondary mb-1">
+              <span>Tỷ lệ sẵn sàng:</span>
+              <span id="stat-available-rate" class="fw-bold text-success">100%</span>
+            </div>
+            <div class="progress" style="height: 4px; background: rgba(255,255,255,0.08);">
+              <div id="stat-pool-progress" class="progress-bar bg-success" style="width: 100%"></div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="col-6 col-xl-3">
+        <div class="glass-panel stat-card stat-rose p-4 h-100">
+          <div class="d-flex justify-content-between align-items-start">
+            <div>
+              <p class="text-secondary small fw-semibold text-uppercase mb-1">Đã được rút</p>
+              <h2 id="stat-drawn" class="display-6 fw-bold mb-0 text-white">0</h2>
+            </div>
+            <div class="icon-box">
+              <i class="bi bi-hand-index-thumb-fill"></i>
+            </div>
+          </div>
+          <div class="mt-3 pt-2 border-top border-white-50 border-opacity-10 d-flex justify-content-between small text-secondary">
+            <span>Đã tiêu thụ:</span>
+            <span id="stat-drawn-rate" class="fw-bold text-danger">0%</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- Thẻ Hiếm (Màu Tím) -->
+      <div class="col-6 col-xl-3">
+        <div class="glass-panel stat-card stat-purple p-4 h-100">
+          <div class="d-flex justify-content-between align-items-start">
+            <div>
+              <p class="small fw-semibold text-uppercase mb-1" style="color: #c084fc;">Thẻ Hiếm</p>
+              <h2 id="stat-rare" class="display-6 fw-bold mb-0" style="color: #e9d5ff;">0</h2>
+            </div>
+            <div class="icon-box">
+              <i class="bi bi-stars"></i>
+            </div>
+          </div>
+          <div class="mt-3 pt-2 border-top border-white-50 border-opacity-10 d-flex justify-content-between small text-secondary">
+            <span>Tỷ lệ xuất hiện Hiếm:</span>
+            <span id="stat-rare-rate" class="fw-bold" style="color: #c084fc;">0%</span>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- 2. Controls & Filter Bar -->
+    <section class="glass-panel p-3 mb-4">
+      <div class="row g-3 align-items-center justify-content-between">
+        
+        <!-- Search and Filters (Tích hợp Lịch sử rút trực tiếp như 1 Tab) -->
+        <div class="col-12 col-lg-8 d-flex flex-wrap align-items-center gap-2">
+          
+          <!-- Search box -->
+          <div class="input-group" style="max-width: 250px;">
+            <span class="input-group-text bg-dark border-secondary border-opacity-25 text-secondary">
+              <i class="bi bi-search"></i>
+            </span>
+            <input type="text" id="search-input" class="form-control form-custom form-control-sm" placeholder="Tìm kiếm theo URL, ID...">
+          </div>
+
+          <!-- Filter buttons: Tất cả | Còn kho | Đã hết | Hiếm | Thường | Lịch sử rút -->
+          <div class="d-flex flex-wrap align-items-center gap-1">
+            <button class="filter-btn active" data-filter="all">Tất cả (<span id="count-filter-all">0</span>)</button>
+            <button class="filter-btn" data-filter="available">Còn kho (<span id="count-filter-avail">0</span>)</button>
+            <button class="filter-btn" data-filter="drawn">Đã hết (<span id="count-filter-drawn">0</span>)</button>
+            <button class="filter-btn" data-filter="rare">Hiếm (<span id="count-filter-rare">0</span>)</button>
+            <button class="filter-btn" data-filter="common">Thường (<span id="count-filter-common">0</span>)</button>
+            <button class="filter-btn" data-filter="history">Lịch sử rút (<span id="history-badge-count">0</span>)</button>
+          </div>
+        </div>
+
+        <!-- Right Side Tools -->
+        <div class="col-12 col-lg-4 d-flex flex-wrap align-items-center justify-content-lg-end gap-2">
+          
+          <!-- Reset Pool Button -->
+          <button id="reset-pool-btn" class="btn btn-sm btn-warning text-dark fw-bold rounded-pill px-3 shadow-sm">
+            <i class="bi bi-arrow-counterclockwise me-1"></i> Reset Pool
+          </button>
+
+          <!-- View Switcher (Grid vs Table) -->
+          <div class="btn-group btn-group-sm p-1 rounded-pill bg-dark border border-secondary border-opacity-25" role="group">
+            <button type="button" id="view-grid-btn" class="btn btn-primary rounded-pill px-3" style="background: #a855f7; border: none;" title="Chế độ Lưới Thẻ 3D">
+              <i class="bi bi-grid-fill"></i>
+            </button>
+            <button type="button" id="view-table-btn" class="btn btn-dark rounded-pill px-3 text-secondary" title="Chế độ Bảng Danh Sách">
+              <i class="bi bi-list-ul"></i>
+            </button>
+          </div>
+
+        </div>
+      </div>
+    </section>
+
+    <!-- 3. Cards Display Section (Hiển thị Lưới 3D hoặc Bảng Danh Sách) -->
+    <section>
+      <!-- Grid View Container -->
+      <div id="cards-grid-view" class="row row-cols-1 row-cols-sm-2 row-cols-md-3 row-cols-lg-4 row-cols-xl-5 g-4">
+        <!-- Rendered by JS -->
+      </div>
+
+      <!-- Table View Container -->
+      <div id="cards-table-view" class="glass-panel overflow-hidden d-none">
+        <div class="table-responsive">
+          <table class="table table-custom align-middle">
+            <thead>
+              <tr>
+                <th style="width: 70px;">Ảnh</th>
+                <th>Thông tin Thẻ</th>
+                <th>Độ hiếm</th>
+                <th>Trạng thái kho</th>
+                <th>Số lượng còn lại</th>
+                <th>Người rút gần nhất</th>
+                <th class="text-end" style="width: 140px;">Thao tác</th>
+              </tr>
+            </thead>
+            <tbody id="cards-table-body">
+              <!-- Rendered by JS -->
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+      <!-- Empty State Banner -->
+      <div id="empty-state" class="glass-panel text-center py-5 d-none">
+        <div class="mb-3 text-secondary" style="font-size: 3.5rem;">
+          <i class="bi bi-inboxes"></i>
+        </div>
+        <h4 class="fw-bold">Không tìm thấy thẻ nào!</h4>
+        <p class="text-secondary small mb-4">Hiện chưa có thẻ nào phù hợp với bộ lọc, hoặc kho thẻ đang rỗng.</p>
+        <button class="btn btn-primary btn-sm rounded-pill px-4" onclick="openAddCardModal()">
+          <i class="bi bi-plus-lg me-1"></i> Thêm thẻ ngay
+        </button>
+      </div>
+    </section>
+
+  </main>
+
+  <!-- ========================================================================= -->
+  <!-- MODALS -->
+  <!-- ========================================================================= -->
+
+  <!-- Modal: Add / Edit Card -->
+  <div class="modal fade modal-custom" id="cardModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h5 class="modal-title fw-bold d-flex align-items-center gap-2" id="modalTitle">
+            <i class="bi bi-plus-circle text-primary"></i> Thêm Thẻ Mới
+          </h5>
+          <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+        </div>
+        <div class="modal-body">
+          <form id="card-form" onsubmit="event.preventDefault(); saveCard();">
+            <input type="hidden" id="card-id">
+
+            <!-- Image URL -->
+            <div class="mb-3">
+              <label class="form-label small fw-semibold text-secondary">URL Hình ảnh Thẻ bài <span class="text-danger">*</span></label>
+              <div class="input-group">
+                <span class="input-group-text bg-dark border-secondary border-opacity-25 text-secondary"><i class="bi bi-link-45deg"></i></span>
+                <input type="url" class="form-control form-custom" id="card-img" placeholder="https://domain.com/image.jpg" required>
+              </div>
+            </div>
+
+            <!-- Image Live Preview -->
+            <div class="mb-3 text-center">
+              <div id="modal-img-preview-box" class="rounded-3 border border-secondary border-opacity-25 overflow-hidden d-none mx-auto" style="max-width: 200px; height: 260px; background: #000;">
+                <img id="modal-img-preview" src="" alt="Preview" class="w-100 h-100 object-fit-cover">
+              </div>
+            </div>
+
+            <!-- Quantity & Rarity Options -->
+            <div class="row g-3 mb-3">
+              <div class="col-6">
+                <label class="form-label small fw-semibold text-secondary">Số lượng phát hành</label>
+                <input type="number" class="form-control form-custom" id="card-quantity" value="1" min="1" max="1000" required>
+              </div>
+              <div class="col-6 d-flex flex-column justify-content-end">
+                <div class="form-check form-switch p-2 rounded-3 border border-purple border-opacity-25" style="background: rgba(168, 85, 247, 0.1); border-color: rgba(168, 85, 247, 0.4) !important;">
+                  <input class="form-check-input ms-0 me-2" type="checkbox" id="card-israre" style="accent-color: #a855f7;">
+                  <label class="form-check-label fw-bold small" for="card-israre" style="color: #c084fc;">
+                    <i class="bi bi-stars me-1"></i> Thẻ Hiếm
+                  </label>
+                </div>
+              </div>
+            </div>
+
+          </form>
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-outline-secondary rounded-pill px-4" data-bs-dismiss="modal">Hủy</button>
+          <button type="button" class="btn btn-primary rounded-pill px-4" style="background: linear-gradient(135deg, #a855f7, #6366f1); border: none;" id="save-card-btn" onclick="saveCard()">
+            <i class="bi bi-check-lg me-1"></i> Lưu Thẻ
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Modal: Admin Test Draw Simulator -->
+  <div class="modal fade modal-custom" id="simulatorModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h5 class="modal-title fw-bold text-info d-flex align-items-center gap-2">
+            <i class="bi bi-dice-5-fill"></i> Rút Thử Nghiệm (Admin Simulator)
+          </h5>
+          <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+        </div>
+        <div class="modal-body text-center py-4">
+          
+          <p class="text-secondary small mb-4">Mô phỏng thao tác của người chơi khi gọi API <code>POST /api/cards/draw</code>.</p>
+          
+          <!-- 3D Flip Card Container -->
+          <div class="simulator-card-box mb-4">
+            <div class="simulator-inner" id="sim-flip-card">
+              <!-- Front (Face down) -->
+              <div class="sim-front">
+                <i class="bi bi-patch-question-fill text-secondary mb-2" style="font-size: 3.5rem;"></i>
+                <span class="fw-bold text-secondary text-uppercase tracking-wider small">CARD ARENA</span>
+              </div>
+              <!-- Back (Face up) -->
+              <div class="sim-back">
+                <img id="sim-card-img" src="" alt="Drawn Card">
+              </div>
+            </div>
+          </div>
+
+          <!-- Result Status -->
+          <div id="sim-result-box" class="alert d-none py-2 px-3 fw-bold small rounded-pill mx-auto" style="max-width: 320px;"></div>
+
+          <button id="sim-draw-btn" class="btn btn-primary btn-lg rounded-pill px-5 fw-bold shadow-lg" style="background: linear-gradient(135deg, #a855f7, #6366f1); border: none;" onclick="simulateDrawCard()">
+            <i class="bi bi-magic me-2"></i> Rút Ngay 1 Thẻ
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Modal: Lightbox Image Zoom -->
+  <div class="modal fade" id="imageLightboxModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered modal-lg">
+      <div class="modal-content bg-transparent border-0 text-center">
+        <img id="lightbox-img" src="" class="img-fluid rounded-4 shadow-2xl mx-auto" style="max-height: 85vh; border: 2px solid rgba(255,255,255,0.2);">
+      </div>
+    </div>
+  </div>
+
+  <!-- JavaScript Libraries -->
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11.10.5/dist/sweetalert2.all.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.9.2/dist/confetti.browser.min.js"></script>
+  
+  <!-- Main Admin Logic -->
+  <script src="app.js"></script>
+</body>
+</html>

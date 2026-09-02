@@ -1,14 +1,19 @@
 let currentMode = 'scratch-mode';
-const API_BASE_URL = 'https://ab8307a46d10ca.lhr.life';
+// const API_BASE_URL = 'https://scratch-e7e5.onrender.com';
+const API_BASE_URL = 'http://localhost:5037/api/cards';
 
 async function drawCardFromAPI() {
     try {
-        const response = await fetch(`${API_BASE_URL}/api/cards/draw`);
+        const device = navigator.userAgent;
+        const response = await fetch(`${API_BASE_URL}/draw?deviceInfo=${encodeURIComponent(device)}`, {
+            method: 'POST'
+        });
         if (response.status === 404) {
             alert('Đã hết thẻ trong kho! Hãy quay lại sau.');
             return null;
         }
-        return await response.json();
+        const data = await response.json();
+        return data;
     } catch (error) {
         console.error('Lỗi khi gọi API:', error);
         alert('Không thể kết nối tới Backend. Hãy kiểm tra kết nối!');
@@ -27,7 +32,7 @@ async function initScratchMode() {
     wrapper.className = 'scratch-card-wrapper';
 
     const img = document.createElement('img');
-    img.src = cardObj.img;
+    img.src = cardObj.imgUrl;
     img.className = 'card-image';
 
     const canvas = document.createElement('canvas');
@@ -233,7 +238,7 @@ async function initValorantMode() {
     back.className = 'val-back';
     
     const img = document.createElement('img');
-    img.src = cardObj.img;
+    img.src = cardObj.imgUrl || cardObj.img;
     img.className = 'card-image';
     
     back.appendChild(img);
