@@ -59,8 +59,8 @@ public class Card
 
 public class CardService
 {
-    private List<Card> _pool;
-    private readonly Random _random = new Random();
+    private List<Card> _pool = new();
+    private readonly object _lock = new();
 
     public CardService()
     {
@@ -69,27 +69,32 @@ public class CardService
 
     public void ResetPool()
     {
-        _pool = new List<Card>
+        lock (_lock)
         {
-            new Card { IsRare = true, Img = "https://cattime.com/wp-content/uploads/sites/14/2011/12/GettyImages-1319206416-e1697653931697.jpg?w=1024" },
-            new Card { IsRare = false, Img = "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcQBCGT7VYA9RhOgINThMhjoFacQ2J86ILcJcDKQL0ugnmTSRbvcPQdnD5w&s=10" },
-            new Card { IsRare = false, Img = "https://placecats.com/200/300?3" },
-            new Card { IsRare = false, Img = "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcRIBGDzp8I00qolfUfHL5qBXSVhSJz4emasu7jOLqlQAWv2_3pgSSsZ00w1&s=10" },
-            new Card { IsRare = false, Img = "https://placecats.com/200/300?4" }
-        };
+            _pool = new List<Card>
+            {
+                new Card { IsRare = true, Img = "https://cattime.com/wp-content/uploads/sites/14/2011/12/GettyImages-1319206416-e1697653931697.jpg?w=1024" },
+                new Card { IsRare = false, Img = "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcQBCGT7VYA9RhOgINThMhjoFacQ2J86ILcJcDKQL0ugnmTSRbvcPQdnD5w&s=10" },
+                new Card { IsRare = false, Img = "https://placecats.com/200/300?3" },
+                new Card { IsRare = false, Img = "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcRIBGDzp8I00qolfUfHL5qBXSVhSJz4emasu7jOLqlQAWv2_3pgSSsZ00w1&s=10" },
+                new Card { IsRare = false, Img = "https://placecats.com/200/300?4" }
+            };
+        }
     }
 
-    public Card DrawRandomCard()
+    public Card? DrawRandomCard()
     {
-        // Khi hết thẻ thì báo hết, KHÔNG tự động reset nữa
-        if (_pool.Count == 0) 
+        lock (_lock)
         {
-            return null;
-        }
+            if (_pool.Count == 0) 
+            {
+                return null;
+            }
 
-        int index = _random.Next(_pool.Count);
-        var card = _pool[index];
-        _pool.RemoveAt(index);
-        return card;
+            int index = Random.Shared.Next(_pool.Count);
+            var card = _pool[index];
+            _pool.RemoveAt(index);
+            return card;
+        }
     }
 }
