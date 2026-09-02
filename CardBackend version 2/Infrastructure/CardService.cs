@@ -16,7 +16,8 @@ public class CardService(CardDbContext db, ILogger<CardService> logger) : ICardS
         }
         catch (Exception e)
         {
-            logger.LogError(e, "Database is currently unavailable");
+            logger.LogError(e, "Lỗi khi thêm thẻ vào Database: {Message}", e.Message);
+            throw;
         }
     }
 
@@ -35,7 +36,8 @@ public class CardService(CardDbContext db, ILogger<CardService> logger) : ICardS
         }
         catch (Exception e)
         {
-            logger.LogError(e, "Database is currently unavailable");
+            logger.LogError(e, "Lỗi khi xóa thẻ khỏi Database: {Message}", e.Message);
+            throw;
         }
     }
 
@@ -60,8 +62,8 @@ public class CardService(CardDbContext db, ILogger<CardService> logger) : ICardS
         }
         catch (Exception e)
         {
-            logger.LogError(e, "An error has occured");
-            return null;
+            logger.LogError(e, "Lỗi khi rút thẻ: {Message}", e.Message);
+            throw;
         }
     }
 
@@ -73,7 +75,8 @@ public class CardService(CardDbContext db, ILogger<CardService> logger) : ICardS
         }
         catch (Exception e)
         {
-            logger.LogError(e, "Database is currently unavailable");
+            logger.LogError(e, "Lỗi khi reset pool: {Message}", e.Message);
+            throw;
         }
     }
 
@@ -92,7 +95,8 @@ public class CardService(CardDbContext db, ILogger<CardService> logger) : ICardS
         }
         catch (Exception e)
         {
-            logger.LogError(e, "Database is currently unavailable");
+            logger.LogError(e, "Lỗi khi cập nhật thẻ: {Message}", e.Message);
+            throw;
         }
     }
 
@@ -105,8 +109,8 @@ public class CardService(CardDbContext db, ILogger<CardService> logger) : ICardS
         }
         catch (Exception e)
         {
-            logger.LogError(e, "Database is currently unavailable");
-            return [];
+            logger.LogError(e, "Lỗi khi lấy danh sách thẻ từ Database: {Message}", e.Message);
+            throw;
         }
     }
 }

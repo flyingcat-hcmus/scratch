@@ -57,7 +57,7 @@ using (var scope = app.Services.CreateScope())
         }
         catch (Exception ex)
         {
-            app.Logger.LogWarning(ex, "Could not auto-migrate or seed database on startup.");
+            app.Logger.LogError(ex, "LỖI KHỞI TẠO HOẶC SEED DATABASE: {Message}", ex.Message);
         }
     }
 }
