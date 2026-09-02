@@ -59,6 +59,28 @@ body {
   background: #4b5563;
 }
 
+/* Draw History Scroll Box */
+.draw-history-scroll-box {
+  max-height: 90px;
+  overflow-y: auto;
+  overflow-x: hidden;
+  padding-right: 4px;
+}
+.draw-history-scroll-box::-webkit-scrollbar {
+  width: 4px;
+}
+.draw-history-scroll-box::-webkit-scrollbar-track {
+  background: rgba(255, 255, 255, 0.05);
+  border-radius: 4px;
+}
+.draw-history-scroll-box::-webkit-scrollbar-thumb {
+  background: rgba(168, 85, 247, 0.5);
+  border-radius: 4px;
+}
+.draw-history-scroll-box::-webkit-scrollbar-thumb:hover {
+  background: rgba(168, 85, 247, 0.8);
+}
+
 /* Glassmorphism Card */
 .glass-panel {
   background: var(--bg-card);

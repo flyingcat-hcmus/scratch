@@ -48,6 +48,40 @@ document.addEventListener('DOMContentLoaded', () => {
 let isPollingActive = true;
 let previousCardsMap = new Map();
 
+// Quản lý danh sách tất cả các lượt rút
+let drawHistoryMap = {};
+try {
+  drawHistoryMap = JSON.parse(localStorage.getItem('card_draw_history_v2') || '{}');
+} catch (e) {
+  drawHistoryMap = {};
+}
+
+function recordDrawHistory(cardId, drawnAt, deviceInfo) {
+  if (!cardId || !drawnAt) return;
+  if (!drawHistoryMap[cardId]) {
+    drawHistoryMap[cardId] = [];
+  }
+  
+  const exists = drawHistoryMap[cardId].some(h => h.time === drawnAt);
+  if (!exists) {
+    drawHistoryMap[cardId].unshift({
+      time: drawnAt,
+      device: deviceInfo || 'Thiết bị không xác định'
+    });
+    try {
+      localStorage.setItem('card_draw_history_v2', JSON.stringify(drawHistoryMap));
+    } catch (e) {}
+  }
+}
+
+function getCardHistory(card) {
+  if (!card || !card.id) return [];
+  if (card.drawnAt) {
+    recordDrawHistory(card.id, card.drawnAt, card.deviceInfo);
+  }
+  return drawHistoryMap[card.id] || [];
+}
+
 function startAutoPolling() {
   setInterval(async () => {
     if (!isPollingActive) return;
@@ -368,10 +402,6 @@ function renderGridView(cards) {
           </div>
 
           <!-- Actions -->
-          <div class="d-flex gap-2 pt-2 border-top border-white-50 border-opacity-10 mt-2">
-            <button class="btn btn-outline-primary btn-sm rounded-pill flex-grow-1 py-1" onclick="openEditCardModal('${card.id}')">
-              <i class="bi bi-pencil-square me-1"></i> Sửa
-            </button>
             <button class="btn btn-outline-danger btn-sm rounded-pill px-3 py-1" onclick="confirmDeleteCard('${card.id}')">
               <i class="bi bi-trash"></i>
             </button>
@@ -388,7 +418,105 @@ function renderGridView(cards) {
 // Render Table View (Khớp 100% với giao diện Bảng Danh Sách)
 function renderTableView(cards) {
   const tbody = document.getElementById('cards-table-body');
+  const thead = document.getElementById('table-head');
   tbody.innerHTML = '';
+
+  // Chế độ xem Lịch sử rút: Mỗi 1 lượt rút là 1 hàng riêng biệt
+  if (currentFilter === 'history') {
+    thead.innerHTML = `
+      <tr>
+        <th style="width: 180px;">Thời gian rút</th>
+        <th style="width: 70px;">Ảnh</th>
+        <th>Mã Thẻ (ID)</th>
+        <th>Độ hiếm</th>
+        <th>Người rút / Thiết bị</th>
+        <th class="text-end" style="width: 160px;">Trạng thái</th>
+      </tr>
+    `;
+
+    // Thu thập tất cả các lượt rút thành danh sách phẳng
+    let allDrawEvents = [];
+    cards.forEach(card => {
+      const historyList = getCardHistory(card);
+      if (historyList.length > 0) {
+        historyList.forEach(h => {
+          allDrawEvents.push({
+            cardId: card.id,
+            imgUrl: card.imgUrl,
+            isRare: card.isRare,
+            time: h.time,
+            device: h.device
+          });
+        });
+      } else if (card.drawnAt) {
+        allDrawEvents.push({
+          cardId: card.id,
+          imgUrl: card.imgUrl,
+          isRare: card.isRare,
+          time: card.drawnAt,
+          device: card.deviceInfo || 'Thiết bị không xác định'
+        });
+      }
+    });
+
+    // Sắp xếp thời gian mới nhất lên đầu
+    allDrawEvents.sort((a, b) => new Date(b.time) - new Date(a.time));
+
+    if (allDrawEvents.length === 0) {
+      tbody.innerHTML = `<tr><td colspan="6" class="text-center text-secondary py-4">- Chưa có lượt rút nào -</td></tr>`;
+      return;
+    }
+
+    allDrawEvents.forEach(item => {
+      const tr = document.createElement('tr');
+      tr.innerHTML = `
+        <td>
+          <span class="text-info fw-semibold" style="font-size: 0.85rem;">
+            <i class="bi bi-clock me-1"></i>${new Date(item.time).toLocaleString('vi-VN')}
+          </span>
+        </td>
+        <td>
+          <img src="${escapeHtml(item.imgUrl)}" class="table-thumb" alt="Thumbnail" onclick="openLightbox('${escapeHtml(item.imgUrl)}')">
+        </td>
+        <td>
+          <span class="copy-id-btn" title="Bấm để copy ID" onclick="copyToClipboard('${item.cardId}')">
+            ${item.cardId} <i class="bi bi-copy ms-1"></i>
+          </span>
+        </td>
+        <td>
+          <span class="${item.isRare ? 'badge-rare' : 'badge-common'}">
+            ${item.isRare ? 'Hiếm' : 'Thường'}
+          </span>
+        </td>
+        <td>
+          <div class="text-light fw-medium small">
+            <i class="bi bi-laptop me-1 text-secondary"></i>${escapeHtml(item.device)}
+          </div>
+        </td>
+        <td class="text-end">
+          <span class="badge bg-success-subtle text-success border border-success-subtle rounded-pill px-3 py-1" style="font-size: 0.78rem;">
+            Đã rút thành công
+          </span>
+        </td>
+      `;
+      tbody.appendChild(tr);
+    });
+
+    return;
+  }
+
+  // Chế độ xem Kho Thẻ bình thường
+  thead.innerHTML = `
+    <tr>
+      <th style="width: 70px;">Ảnh</th>
+      <th>Thông tin Thẻ</th>
+      <th>Độ hiếm</th>
+      <th>Trạng thái kho</th>
+      <th>Số lượng còn lại</th>
+      <th>Người rút gần nhất</th>
+      <th class="text-end" style="width: 140px;">Thao tác</th>
+    </tr>
+  `;
 
   cards.forEach(card => {
     const isAvail = (card.remaining > 0 || (!card.isDrawn && card.remaining === undefined));
@@ -432,7 +560,7 @@ function renderTableView(cards) {
             <div class="text-light fw-semibold"><i class="bi bi-clock me-1 text-info"></i>${new Date(card.drawnAt).toLocaleString('vi-VN')}</div>
             <div class="text-secondary"><i class="bi bi-laptop me-1"></i>${escapeHtml(card.deviceInfo || 'Thiết bị không xác định')}</div>
           </div>
-        ` : '<span class="text-secondary opacity-50">- Chưa có -</span>'}
+        ` : '<span class="text-secondary opacity-50 small">- Chưa có -</span>'}
       </td>
       <td class="text-end">
         <button class="btn btn-outline-primary btn-sm rounded-pill me-1" title="Chỉnh sửa" onclick="openEditCardModal('${card.id}')">
@@ -443,7 +571,6 @@ function renderTableView(cards) {
         </button>
       </td>
     `;
-
     tbody.appendChild(tr);
   });
 }

@@ -191,12 +191,12 @@
         <!-- Rendered by JS -->
       </div>
 
-      <!-- Table View Container -->
-      <div id="cards-table-view" class="glass-panel overflow-hidden d-none">
+      <!-- Table View Container (Duy nhất 1 thanh Scrollbar bên phải) -->
+      <div id="cards-table-view" class="glass-panel d-none" style="max-height: 600px; overflow-y: auto; overflow-x: hidden;">
         <div class="table-responsive">
-          <table class="table table-custom align-middle">
-            <thead>
-              <tr>
+          <table class="table table-custom align-middle mb-0">
+            <thead id="table-head" class="sticky-top bg-dark" style="z-index: 10; border-bottom: 1px solid rgba(255,255,255,0.1);">
+              <tr id="table-head-row">
                 <th style="width: 70px;">Ảnh</th>
                 <th>Thông tin Thẻ</th>
                 <th>Độ hiếm</th>

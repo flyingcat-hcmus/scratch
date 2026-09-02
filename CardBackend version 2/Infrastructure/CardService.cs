@@ -45,20 +45,30 @@ public class CardService(CardDbContext db, ILogger<CardService> logger) : ICardS
     {
         try
         {
-            var card = await db.Cards
-                        .Where(p => p.Remaining > 0)
-                        .OrderBy(p => EF.Functions.Random())
-                        .FirstOrDefaultAsync();
+            var now = DateTime.UtcNow;
+            var drawnCard = await db.Cards
+                .FromSqlInterpolated($@"
+                    WITH selected_card AS (
+                        SELECT ""Id""
+                        FROM ""Cards""
+                        WHERE ""Remaining"" > 0
+                        ORDER BY RANDOM()
+                        LIMIT 1
+                        FOR UPDATE SKIP LOCKED
+                    )
+                    UPDATE ""Cards""
+                    SET 
+                        ""Remaining"" = ""Remaining"" - 1,
+                        ""DrawnAt"" = {now},
+                        ""DeviceInfo"" = {deviceInfo}
+                    FROM selected_card
+                    WHERE ""Cards"".""Id"" = selected_card.""Id""
+                    RETURNING ""Cards"".*;
+                ")
+                .AsNoTracking()
+                .FirstOrDefaultAsync();
 
-            if (card is null)
-            {
-                return null;
-            }
-
-            card.DrawCard(deviceInfo);
-            await db.SaveChangesAsync();
-
-            return card;
+            return drawnCard;
         }
         catch (Exception e)
         {
