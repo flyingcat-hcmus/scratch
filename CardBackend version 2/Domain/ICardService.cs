@@ -1,3 +1,4 @@
+using Domain.DTOs;
 using System;
 using System.Collections.Generic;
 using System.Text;
@@ -6,7 +7,7 @@ namespace Domain;
 
 public interface ICardService
 {
-    Task<Card?> DrawCardAsync(string? deviceInfo = null);
+    Task<DrawnCard?> DrawCardAsync(string? deviceInfo = null);
     Task ResetPoolAsync();
     Task AddCardAsync(string url, bool rare, int quantity);
     Task DeleteCardAsync(Guid Id);

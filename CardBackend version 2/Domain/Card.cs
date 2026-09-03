@@ -7,8 +7,7 @@ public class Card
     public bool IsRare { get; private set; }
     public int Quantity { get; private set; }
     public int Remaining { get; private set; }
-    public DateTime? DrawnAt { get; private set; }
-    public string? DeviceInfo { get; private set; }
+    public List<DrawHistory> DrawHistories { get; private set; } = null!;
 
     private Card() { }
 
@@ -24,7 +23,7 @@ public class Card
         };
     }
 
-    public static Card CreateExisting(Guid id, string url, bool rare, int quantity, int remaining, DateTime? drawnAt, string? deviceInfo)
+    public static Card CreateExisting(Guid id, string url, bool rare, int quantity, int remaining)
     {
         return new Card
         {
@@ -33,8 +32,6 @@ public class Card
             IsRare = rare,
             Quantity = quantity,
             Remaining = remaining,
-            DrawnAt = drawnAt,
-            DeviceInfo = deviceInfo
         };
     }
 
@@ -57,13 +54,8 @@ public class Card
         }
     }
 
-    public void DrawCard(string? deviceInfo = null)
+    public void DrawCard()
     {
         Remaining--;
-        DrawnAt = DateTime.UtcNow;
-        if (!string.IsNullOrEmpty(deviceInfo))
-        {
-            DeviceInfo = deviceInfo;
-        }
     }
 }

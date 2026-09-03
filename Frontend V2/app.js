@@ -76,6 +76,17 @@ function recordDrawHistory(cardId, drawnAt, deviceInfo) {
 
 function getCardHistory(card) {
   if (!card || !card.id) return [];
+  
+  // 1. Ưu tiên lấy từ mảng drawHistories mà Database PostgreSQL trả về
+  const dbHistories = card.drawHistories || card.DrawHistories;
+  if (Array.isArray(dbHistories) && dbHistories.length > 0) {
+    return dbHistories.map(h => ({
+      time: h.drawnAt || h.DrawnAt,
+      device: h.deviceInfo || h.DeviceInfo || 'Thiết bị không xác định'
+    }));
+  }
+
+  // 2. Fallback dữ liệu nếu có
   if (card.drawnAt) {
     recordDrawHistory(card.id, card.drawnAt, card.deviceInfo);
   }

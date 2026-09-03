@@ -1,4 +1,5 @@
 using Domain;
+using Domain.DTOs;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
 
@@ -41,7 +42,7 @@ public class CardService(CardDbContext db, ILogger<CardService> logger) : ICardS
         }
     }
 
-    public async Task<Card?> DrawCardAsync(string? deviceInfo = null)
+    public async Task<DrawnCard?> DrawCardAsync(string? deviceInfo = null)
     {
         try
         {
@@ -63,12 +64,17 @@ public class CardService(CardDbContext db, ILogger<CardService> logger) : ICardS
                 )
                 UPDATE ""Cards""
                 SET 
-                    ""Remaining"" = ""Remaining"" - 1,
-                    ""DrawnAt"" = @drawnAt,
-                    ""DeviceInfo"" = @deviceInfo
+                    ""Remaining"" = ""Remaining"" - 1
                 FROM selected_card
                 WHERE ""Cards"".""Id"" = selected_card.""Id""
-                RETURNING ""Cards"".""Id"", ""Cards"".""ImgUrl"", ""Cards"".""IsRare"", ""Cards"".""Quantity"", ""Cards"".""Remaining"", ""Cards"".""DrawnAt"", ""Cards"".""DeviceInfo"";
+
+                UPDATE ""DrawHistories""
+                SET
+                    ""DeviceInfo"" = @deviceInfo,
+                    ""DrawnAt"" = @drawnAt
+                FROM selected_card
+                WHERE ""DrawHistories"".""CardId"" = selected_card.""Id""
+                RETURNING ""Cards"".""Id"", ""Cards"".""ImgUrl"", ""Cards"".""IsRare"", ""DrawHistories"".""DeviceInfo"", ""DrawHistories"".""DrawnAt"";
             ";
 
             var pDrawnAt = cmd.CreateParameter();
@@ -87,12 +93,10 @@ public class CardService(CardDbContext db, ILogger<CardService> logger) : ICardS
                 var id = reader.GetGuid(0);
                 var imgUrl = reader.GetString(1);
                 var isRare = reader.GetBoolean(2);
-                var quantity = reader.GetInt32(3);
-                var remaining = reader.GetInt32(4);
-                var drawnAt = reader.IsDBNull(5) ? (DateTime?)null : reader.GetDateTime(5);
-                var devInfo = reader.IsDBNull(6) ? null : reader.GetString(6);
+                var devInfo = reader.IsDBNull(3) ? null : reader.GetString(3);
+                var drawnAt = reader.IsDBNull(4) ? (DateTime?)null : reader.GetDateTime(4);
 
-                return Card.CreateExisting(id, imgUrl, isRare, quantity, remaining, drawnAt, devInfo);
+                return new DrawnCard(id, imgUrl, isRare, devInfo, drawnAt);
             }
 
             return null;

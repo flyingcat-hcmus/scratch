@@ -21,8 +21,5 @@ public class CardConfiguration : IEntityTypeConfiguration<Card>
 
         builder.Property(p => p.Remaining)
                .HasDefaultValue(0);
-
-        builder.Property(p => p.DrawnAt)
-               .HasDefaultValue(null);
     }
 }
