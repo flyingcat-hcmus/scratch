@@ -59,7 +59,7 @@ public class CardService(CardDbContext db, ILogger<CardService> logger) : ICardS
                     WHERE ""Remaining"" > 0
                     ORDER BY RANDOM()
                     LIMIT 1
-                    FOR UPDATE SKIP LOCKED
+                    FOR UPDATE
                 )
                 UPDATE ""Cards""
                 SET 
