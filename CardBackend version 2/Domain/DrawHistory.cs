@@ -1,16 +1,19 @@
-﻿namespace Domain;
+using System.Text.Json.Serialization;
+
+namespace Domain;
 
 public class DrawHistory
 {
     public Guid Id { get; private set; }
     public string? DeviceInfo { get; private set; }
     public DateTime? DrawnAt { get; private set; }
+    [JsonIgnore]
     public Card Card { get; private set; } = null!;
     public Guid CardId { get; private set; }
 
     private DrawHistory() { }
 
-    public DrawHistory CreateDrawHistory(string deviceinf, DateTime drawtime, Guid cardId)
+    public static DrawHistory CreateDrawHistory(string deviceinf, DateTime drawtime, Guid cardId)
     {
         return new DrawHistory
         {

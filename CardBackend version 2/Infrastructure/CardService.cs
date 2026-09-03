@@ -55,26 +55,28 @@ public class CardService(CardDbContext db, ILogger<CardService> logger) : ICardS
             using var cmd = conn.CreateCommand();
             cmd.CommandText = @"
                 WITH selected_card AS (
-                    SELECT ""Id""
+                    SELECT ""Id"", ""ImgUrl"", ""IsRare""
                     FROM ""Cards""
                     WHERE ""Remaining"" > 0
                     ORDER BY RANDOM()
                     LIMIT 1
                     FOR UPDATE
+                ),
+                updated_card AS (
+                    UPDATE ""Cards""
+                    SET ""Remaining"" = ""Remaining"" - 1
+                    FROM selected_card
+                    WHERE ""Cards"".""Id"" = selected_card.""Id""
+                    RETURNING ""Cards"".""Id"", ""Cards"".""ImgUrl"", ""Cards"".""IsRare""
+                ),
+                inserted_history AS (
+                    INSERT INTO ""DrawHistories"" (""Id"", ""CardId"", ""DeviceInfo"", ""DrawnAt"")
+                    SELECT gen_random_uuid(), ""Id"", @deviceInfo, @drawnAt
+                    FROM updated_card
+                    RETURNING ""DeviceInfo"", ""DrawnAt""
                 )
-                UPDATE ""Cards""
-                SET 
-                    ""Remaining"" = ""Remaining"" - 1
-                FROM selected_card
-                WHERE ""Cards"".""Id"" = selected_card.""Id""
-
-                UPDATE ""DrawHistories""
-                SET
-                    ""DeviceInfo"" = @deviceInfo,
-                    ""DrawnAt"" = @drawnAt
-                FROM selected_card
-                WHERE ""DrawHistories"".""CardId"" = selected_card.""Id""
-                RETURNING ""Cards"".""Id"", ""Cards"".""ImgUrl"", ""Cards"".""IsRare"", ""DrawHistories"".""DeviceInfo"", ""DrawHistories"".""DrawnAt"";
+                SELECT u.""Id"", u.""ImgUrl"", u.""IsRare"", h.""DeviceInfo"", h.""DrawnAt""
+                FROM updated_card u, inserted_history h;
             ";
 
             var pDrawnAt = cmd.CreateParameter();
@@ -146,6 +148,7 @@ public class CardService(CardDbContext db, ILogger<CardService> logger) : ICardS
         try
         {
             return await db.Cards.AsNoTracking()
+                                 .Include(p => p.DrawHistories)
                                  .ToListAsync();
         }
         catch (Exception e)
